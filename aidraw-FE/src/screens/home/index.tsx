@@ -1,9 +1,11 @@
-import { ColorSwatch, Group } from '@mantine/core';
+import { ColorSwatch, Group, Slider } from '@mantine/core';
 import { Button } from '@/components/ui/button';
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import Draggable from 'react-draggable';
 import { SWATCHES } from '@/constants';
+import Pencil from '../../assets/pencil.png'
+import Eraser from '../../assets/eraser.png'
 // import {LazyBrush} from 'lazy-brush';
 
 interface GeneratedResult {
@@ -24,8 +26,10 @@ export default function Home() {
     const [reset, setReset] = useState(false);
     const [dictOfVars, setDictOfVars] = useState({});
     const [result, setResult] = useState<GeneratedResult>();
-    const [latexPosition, setLatexPosition] = useState({ x: 10, y: 200 });
+    const [latexPosition, setLatexPosition] = useState({ x: 0, y: 0 });
     const [latexExpression, setLatexExpression] = useState<Array<string>>([]);
+    const [isErasing, setIsErasing] = useState(false);
+    const [sliderValue, setSliderValue] = useState(3);
 
     // const lazyBrush = new LazyBrush({
     //     radius: 10,
@@ -115,7 +119,6 @@ export default function Home() {
     const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
         const canvas = canvasRef.current;
         if (canvas) {
-            canvas.style.background = 'black';
             const ctx = canvas.getContext('2d');
             if (ctx) {
                 ctx.beginPath();
@@ -132,9 +135,19 @@ export default function Home() {
         if (canvas) {
             const ctx = canvas.getContext('2d');
             if (ctx) {
-                ctx.strokeStyle = color;
-                ctx.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
-                ctx.stroke();
+                if (isErasing) {
+                    setColor('');
+                    ctx.globalCompositeOperation = 'destination-out';
+                    ctx.lineWidth = sliderValue;
+                    ctx.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+                    ctx.stroke();
+                } else {
+                    ctx.globalCompositeOperation = 'source-over';
+                    ctx.lineWidth = sliderValue;
+                    ctx.strokeStyle = color;
+                    ctx.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+                    ctx.stroke();
+                }
             }
         }
     };
@@ -156,7 +169,7 @@ export default function Home() {
             });
 
             const resp = await response.data;
-            console.log('Response', resp);
+            // console.log('Response', resp);
             resp.data.forEach((data: Response) => {
                 if (data.assign === true) {
                     // dict_of_vars[resp.result] = resp.answer;
@@ -197,52 +210,88 @@ export default function Home() {
         }
     };
 
+    useEffect(() => {
+        if (color) {
+            setIsErasing(false);
+        }
+    }, [color])
+
+    const handleErase = () => {
+        setColor('');
+        setIsErasing(true);
+        setIsDrawing(false);
+    };
+
     return (
         <>
-            <div className='grid grid-cols-3 gap-2'>
-                <Button
-                    onClick={() => setReset(true)}
-                    className='z-20 bg-black text-white'
-                    variant='default'
-                    color='black'
-                >
-                    Reset
-                </Button>
-                <Group className='z-20'>
-                    {SWATCHES.map((swatch) => (
-                        <ColorSwatch key={swatch} color={swatch} onClick={() => setColor(swatch)} />
-                    ))}
-                </Group>
-                <Button
-                    onClick={runRoute}
-                    className='z-20 bg-black text-white'
-                    variant='default'
-                    color='white'
-                >
-                    Run
-                </Button>
-            </div>
-            <canvas
-                ref={canvasRef}
-                id='canvas'
-                className='absolute top-0 left-0 w-full h-full'
-                onMouseDown={startDrawing}
-                onMouseMove={draw}
-                onMouseUp={stopDrawing}
-                onMouseOut={stopDrawing}
-            />
-
-            {latexExpression && latexExpression.map((latex, index) => (
-                <Draggable
-                    key={index}
-                    defaultPosition={latexPosition}
-                    onStop={(e, data) => setLatexPosition({ x: data.x, y: data.y })}
-                >
-                    <div className="absolute p-2 text-white rounded shadow-md">
-                        <div className="latex-content">{latex}</div>
+            <div className='flex flex-col h-screen bg-black'>
+                <div className='flex flex-wrap justify-between items-center p-2 bg-black'>
+                    <Button
+                        onClick={() => setReset(true)}
+                        className='z-20 bg-red-500 text-white'
+                        variant='default'
+                        color='black'
+                    >
+                        Reset
+                    </Button>
+                    <Group className='z-20 bg-slate-400 p-2 rounded-md'>
+                        {SWATCHES.map((swatch) => (
+                            <ColorSwatch key={swatch} color={swatch} onClick={() =>
+                                setColor(swatch)
+                            } >
+                                {color === swatch && <img src={Pencil} alt="Pencil" width={20} height={20} />}
+                            </ColorSwatch>
+                        ))}
+                    </Group>
+                    <Button
+                        className={color ? 'z-20 bg-blue-200 text-white' : 'z-20 bg-indigo-300 text-white'}
+                        variant='default'
+                        color='black'
+                        onClick={handleErase}
+                    >
+                        <img src={Eraser} height={30} width={30} alt="eraser" />
+                    </Button>
+                    <div className='flex items-center space-x-2 bg-blue-200 p-2 rounded'>
+                        <img src={Pencil} height={30} width={30} alt="pencil" />
+                        <Slider
+                            className='w-40'
+                            defaultValue={sliderValue}
+                            color={color ? "blue" : "#a5b4fc"}
+                            min={1}
+                            max={15}
+                            onChange={setSliderValue}
+                        />
+                        <span>{sliderValue}px</span>
                     </div>
-                </Draggable>
-            ))}
+                    <Button
+                        onClick={runRoute}
+                        className='z-20 bg-green-500 text-white'
+                        variant='default'
+                        color='white'
+                    >
+                        Calculate
+                    </Button>
+                </div>
+                <canvas
+                    ref={canvasRef}
+                    className='top-0 left-0 w-full h-full bg-gray-800'
+                    onMouseDown={startDrawing}
+                    onMouseMove={draw}
+                    onMouseUp={stopDrawing}
+                    onMouseOut={stopDrawing}
+                />
+                {latexExpression && latexExpression.map((exp, index) => (
+                    <Draggable
+                        key={index}
+                        defaultPosition={latexPosition}
+                        onStop={(e, data) => setLatexPosition({ x: data.x, y: data.y })}
+                    >
+                        <div className="absolute p-2 text-white rounded shadow-md">
+                            <div className="latex-content">{exp}</div>
+                        </div>
+                    </Draggable>
+                ))}
+            </div>
         </>
     );
 }
