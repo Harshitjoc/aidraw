@@ -239,12 +239,17 @@ export default function Home() {
                             <ColorSwatch key={swatch} color={swatch} onClick={() =>
                                 setColor(swatch)
                             } >
-                                {color === swatch && <img src={Pencil} alt="Pencil" width={20} height={20} />}
+                                {
+                                    color === swatch &&
+                                    <div className='border-2 border-white rounded-full p-1'>
+                                        <img src={Pencil} alt="Pencil" width={18} height={18} />
+                                    </div>
+                                }
                             </ColorSwatch>
                         ))}
                     </Group>
                     <Button
-                        className={color ? 'z-20 bg-blue-200 text-white' : 'z-20 bg-indigo-300 text-white'}
+                        className={color ? 'z-20 bg-blue-200 text-white' : 'z-20 bg-pink-400 text-white'}
                         variant='default'
                         color='black'
                         onClick={handleErase}
@@ -252,11 +257,11 @@ export default function Home() {
                         <img src={Eraser} height={30} width={30} alt="eraser" />
                     </Button>
                     <div className='flex items-center space-x-2 bg-blue-200 p-2 rounded'>
-                        <img src={Pencil} height={30} width={30} alt="pencil" />
+                        {color ? <img src={Pencil} height={25} width={25} alt="Pencil" /> : <img src={Eraser} height={25} width={25} alt="eraser" />}
                         <Slider
                             className='w-40'
                             defaultValue={sliderValue}
-                            color={color ? "blue" : "#a5b4fc"}
+                            color={color ? "blue" : "#f472b6"}
                             min={1}
                             max={15}
                             onChange={setSliderValue}
