@@ -292,7 +292,9 @@ export default function Home() {
                         onStop={(e, data) => setLatexPosition({ x: data.x, y: data.y })}
                     >
                         <div className="absolute p-2 text-white rounded shadow-md">
-                            <div className="latex-content">{exp}</div>
+                            <div className="latex-content">
+                                <pre>{exp.replace(/\\\(.*?\{/, '').replace(/\}.*/, '')}</pre>
+                            </div>
                         </div>
                     </Draggable>
                 ))}
