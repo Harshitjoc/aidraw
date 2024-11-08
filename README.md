@@ -10,9 +10,8 @@
 4. [Technical Requirements](#technical-requirements)
 5. [Getting Started](#getting-started)
 6. [Directory Structure](#directory-structure)
-7. [API Documentation](#api-documentation)
-8. [Contributing](#contributing)
-9. [License](#license)
+7. [Contributing](#contributing)
+8. [License](#license)
 
 ## Introduction
 ---------------
@@ -67,14 +66,14 @@ The backend of the application is built using Python and FastAPI. It is responsi
 
 1.  Clone the repository using `git clone https://github.com/aidraw/aidraw-FE.git`
 2.  Install dependencies using `npm install`
-3.  Start the development server using `npm start`
+3.  Start the development server using `npm run dev`
 4.  Open `http://localhost:3000` in your web browser to access the application
 
 ### aidraw-BE
 
 1.  Clone the repository using `git clone https://github.com/aidraw/aidraw-BE.git`
 2.  Install dependencies using `pip install -r requirements.txt`
-3.  Start the development server using `uvicorn main:app --reload`
+3.  Start the development server using `python main.py`
 4.  Open `http://localhost:8000` in your web browser to access the API documentation
 
 ## Directory Structure
@@ -96,11 +95,6 @@ The backend of the application is built using Python and FastAPI. It is responsi
 *   `routes`: API routes and endpoints
 *   `services`: Business logic and services
 *   `utils`: Utility functions and helpers
-
-## API Documentation
--------------------
-
-The API documentation for the AiDraw backend can be found at [http://localhost:8000/docs](http://localhost:8000/docs).
 
 ## Contributing
 ------------
